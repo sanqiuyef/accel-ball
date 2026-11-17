@@ -1,0 +1,20 @@
+# 构建产物
+/dist/
+/out/
+*.obj
+*.res
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.exe
+
+# 编辑器/系统
+.vs/
+.vscode/
+*.user
+Thumbs.db
+desktop.ini
+
+# 日志
+*.log
