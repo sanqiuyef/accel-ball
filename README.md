@@ -12,6 +12,10 @@ antivirus and PC-manager suites. It does four things:
    (vertical on left/right edges, horizontal on top/bottom edges); hover to expand back
    into the ball, move away to collapse again.
 
+![AccelBall feature overview](docs/images/overview.png)
+
+*Floating ball, cleanup toast, vertical side strip, and horizontal edge strip.*
+
 It does not include virus scanning, process management, auto-start, skins, tray menus, etc.
 
 ## Requirements

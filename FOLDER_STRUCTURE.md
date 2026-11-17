@@ -26,6 +26,7 @@ accel-ball/
 │  └─ net_probe.cpp      打印每块接口过滤条件与速率合计
 ├─ docs/
 │  ├─ 自测记录.md        构建与功能自测记录
+│  ├─ images/            README 展示图（英文/中文总览）
 │  └─ screenshots/       界面截图（本地留档，git 忽略）
 ├─ dist/                 构建产物（git 忽略）
 │  ├─ AccelBall.exe      发布版（管理员权限）
