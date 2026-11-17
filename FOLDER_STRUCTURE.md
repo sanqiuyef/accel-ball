@@ -34,6 +34,7 @@ accel-ball/
 │  ├─ AccelBall-Setup-1.0.0.exe  安装包
 │  └─ obj/               中间产物
 ├─ LICENSE               MIT License
-├─ README.md             项目说明
+├─ README.md             英文说明（GitHub 首页）
+├─ README.zh-CN.md       中文说明
 └─ FOLDER_STRUCTURE.md   本文件
 ```

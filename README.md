@@ -1,119 +1,162 @@
-# 加速球（AccelBall）
+# AccelBall
 
-> Windows 10 floating "acceleration ball": memory usage, live network speed, double-click memory cleanup and edge docking. C++/Win32 + GDI+, single exe, no runtime dependency.
+English | [简体中文](README.zh-CN.md)
 
-Windows 10 桌面悬浮球小工具，借鉴杀毒/电脑管家的「加速球」交互形态，只做四件事：
+A Windows 10 desktop floating "acceleration ball" inspired by the ball widget found in
+antivirus and PC-manager suites. It does four things:
 
-1. 常驻圆形悬浮球，显示当前内存占用百分比。
-2. 双击球上的内存百分比区域，执行一次内存清理并刷新数值。
-3. 实时显示当前主机的网络上传 / 下载速率。
-4. 拖到屏幕边缘松手自动收起为一条只显示内存占用的贴边条（左右边缘竖向、上下边缘横向）；鼠标移入展开为圆球，移出后重新收起。
+1. An always-on-top circular ball showing the current physical memory usage percentage.
+2. Double-click the percentage area to run a memory cleanup and refresh the value.
+3. Live display of the host's network upload / download throughput.
+4. Drag it to a screen edge and release to collapse it into a memory-only strip
+   (vertical on left/right edges, horizontal on top/bottom edges); hover to expand back
+   into the ball, move away to collapse again.
 
-不包含病毒查杀、进程管理、开机自启、皮肤、托盘菜单等功能。
+It does not include virus scanning, process management, auto-start, skins, tray menus, etc.
 
-## 运行要求
+## Requirements
 
-- Windows 10 x64（19045 实测）。
-- 程序以管理员权限运行（manifest `requireAdministrator`），用于回收全系统进程工作集并清理 standby list。从资源管理器双击会弹 UAC；从安装包安装后勾选「运行」不会再弹第二次。
+- Windows 10 x64 (tested on 19045).
+- Runs as administrator (`requireAdministrator` manifest), which is needed to trim
+  working sets across processes and purge the standby list. Launching from Explorer
+  triggers UAC; launching from the installer's "Run" option inherits elevation and does
+  not prompt again.
+- Building requires Visual Studio 2022 Build Tools (MSVC x64) and the Windows SDK.
 
-## 安装 / 使用
+## Install / usage
 
-源码仓库不包含预编译二进制。构建或打包后：
+The source repository does not ship prebuilt binaries. After building / packaging:
 
-- 安装包：`dist/AccelBall-Setup-1.0.0.exe`
-- 绿色版：`dist/AccelBall.exe`
+- Installer: `dist/AccelBall-Setup-1.0.0.exe`
+- Portable: `dist/AccelBall.exe`
 
-安装包会安装到 `C:\Program Files\AccelBall`，创建开始菜单快捷方式（桌面快捷方式为可选项）；卸载走设置 → 应用 → 加速球。绿色版可直接运行。程序需要管理员权限。
+The installer installs to `C:\Program Files\AccelBall` and creates Start Menu shortcuts
+(desktop shortcut optional); uninstall via Settings → Apps → AccelBall. The portable exe
+runs directly. Administrator privileges are required.
 
-操作：
+Usage:
 
-- 球径 74px（原 124px 设计的 60%），圆球内显示百分比、上行、下行；网速用 `K/s`、`M/s` 紧凑单位。
-- 拖动圆球：按住左键拖动。
-- 清理内存：双击球中央的百分比区域；贴边条形态下双击贴边条任意位置。
-- 贴边收起：把球拖到任意屏幕边缘松手，自动吸附。左右边缘变为 30×74 竖向条，上下边缘变为 74×30 横向条。
-- 恢复圆球：鼠标移入贴边条；移出后约 0.45 秒重新收起。
-- 退出 / 立即清理：右键球或贴边条。
-- 窗口位置和贴边状态保存在 `%APPDATA%\AccelBall\config.ini`。
+- The ball is 74 px (60% of the original 124 px design). It shows the memory percentage
+  plus upload/download throughput in compact `K/s` / `M/s` units.
+- Drag: hold the left mouse button and drag the ball.
+- Clean memory: double-click the percentage area in the center; when collapsed,
+  double-click anywhere on the strip.
+- Edge docking: drag to any screen edge and release. Left/right edges become a
+  30×74 vertical strip; top/bottom edges become a 74×30 horizontal strip.
+- Restore: hover the strip; it collapses again about 0.45 s after the mouse leaves.
+- Exit / clean now: right-click the ball or strip.
+- Position and dock state are saved in `%APPDATA%\AccelBall\config.ini`.
 
-## 构建
+## Build
 
-需要 Visual Studio 2022 Build Tools（MSVC x64）与 Windows SDK。构建脚本会用 `vswhere` 自动定位 `vcvars64.bat`；如果自动定位失败，手动指定：
+Requires Visual Studio 2022 Build Tools (MSVC x64) and the Windows SDK. The build script
+uses `vswhere` to locate `vcvars64.bat`; if that fails, set it manually:
 
-```bash
+```bat
 set VCVARS=C:\path\to\VC\Auxiliary\Build\vcvars64.bat
 ```
 
-```bash
-# 开发版（asInvoker，便于无需 UAC 自测）
+```bat
+:: Development build (asInvoker, no UAC needed for local testing)
 build\build.bat dev
 
-# 发布版（requireAdministrator，交付用）
+:: Release build (requireAdministrator)
 build\build.bat release
 ```
 
-产物输出到 `dist/`：`AccelBall-dev.exe`（约 227 KB）或 `AccelBall.exe`（约 227 KB）。
+Outputs go to `dist/`: `AccelBall-dev.exe` (~227 KB) or `AccelBall.exe` (~227 KB).
 
-开发版使用独立的单实例名和 `%APPDATA%\AccelBall\config-dev.ini`，可与发布版并行运行。开发版还支持用环境变量强制缩放做布局自测（不写入发布版）：
+The development build uses a separate single-instance mutex and
+`%APPDATA%\AccelBall\config-dev.ini`, so it can run alongside the release build. It also
+supports a forced DPI override for layout testing (the release build ignores it):
 
-```bash
-set ACCELBALL_DPI=144   # 150% 缩放；发布版忽略此变量
+```bat
+set ACCELBALL_DPI=144   :: 150% scaling, development build only
 dist\AccelBall-dev.exe
 ```
 
-## 网络计数诊断
+## Network counter diagnostic
 
-`tools/net_probe.cpp`（由 `build\build_probe.bat` 构建）会打印每块接口的 `HardwareInterface`、状态、累计字节与过滤结果，并按秒输出过滤后的合计速率，用于核对悬浮球显示：
+`tools/net_probe.cpp` (built by `build\build_probe.bat`) prints each interface's
+`HardwareInterface` flag, status, cumulative bytes and filter result, plus the filtered
+total rate once per second:
 
-```bash
+```bat
 build\build_probe.bat
 dist\net_probe.exe 10
 ```
 
-## 安装包
+## Installer
 
-`installer/accel-ball.iss`，用 Inno Setup 6 的 `ISCC.exe` 编译（把 Inno Setup 安装目录加入 PATH，或使用完整路径）：
+`installer/accel-ball.iss`, compiled with Inno Setup 6's `ISCC.exe` (add its install
+directory to PATH or use the full path):
 
-```bash
+```bat
 iscc installer\accel-ball.iss
 ```
 
-输出 `dist/AccelBall-Setup-1.0.0.exe`。安装向导为英文（Inno Setup 未内置简体中文语言文件），应用名与快捷方式为中文。
+Output: `dist/AccelBall-Setup-1.0.0.exe`. The installer wizard is in English (Inno Setup
+does not bundle a Simplified Chinese language file); the app name and shortcuts are
+Chinese.
 
-## 内存清理机制
+## Memory cleanup
 
-参照 Mem Reduct / WinMemoryCleaner / 360 加速球的常见做法，自研实现（未复制 GPL 代码）：
+Implemented from scratch following the common approach used by Mem Reduct /
+WinMemoryCleaner / 360's acceleration ball (no GPL code copied):
 
-1. 启用 `SeDebugPrivilege`、`SeProfileSingleProcessPrivilege`、`SeIncreaseQuotaPrivilege`。
-2. 遍历系统进程，对可打开的进程调用 `EmptyWorkingSet`，把工作集页移出。
-3. 通过 `NtSetSystemInformation(SystemMemoryListInformation, MemoryPurgeStandbyList)` 清理 standby list。
-4. 前后对比 `GlobalMemoryStatusEx` 的可用物理内存，在球上显示释放量（约 3 秒）。
+1. Enable `SeDebugPrivilege`, `SeProfileSingleProcessPrivilege`,
+   `SeIncreaseQuotaPrivilege`.
+2. Enumerate processes and call `EmptyWorkingSet` on every process that can be opened,
+   moving working-set pages out.
+3. Purge the standby list via
+   `NtSetSystemInformation(SystemMemoryListInformation, MemoryPurgeStandbyList)`.
+4. Compare available physical memory before/after with `GlobalMemoryStatusEx` and show
+   the freed amount on the ball for about 3 seconds.
 
-清理在后台线程执行，不阻塞界面。注意：这类清理会把页移到 standby 或换出，并不保证程序变快，效果因系统当前状态而异；这是「加速球」类工具的普遍行为。
+Cleanup runs on a background thread and does not block the UI. Note: this kind of cleanup
+moves pages to standby or swaps them out; it does not guarantee faster programs, and the
+result depends on the current system state. That is true of acceleration-ball tools in
+general.
 
-## 网速口径
+## Network throughput scope
 
-使用 `GetIfTable2` 读取 64 位累计字节数，按 1 秒采样差值计算。只统计处于 Up 状态的物理接口（`HardwareInterface`），跳过 loopback、隧道和虚拟网卡；本机实测只有 WLAN（Intel AX200）进入求和，FlClash/Meta Tunnel 与 WFP/QoS 过滤接口均被排除，没有重复计数。
+Uses `GetIfTable2` with 64-bit cumulative counters and 1-second deltas. Only physical
+interfaces that are Up (`HardwareInterface`) are counted; loopback, tunnel and virtual
+adapters are skipped. On the test machine only WLAN (Intel AX200) entered the sum;
+FlClash/Meta Tunnel and WFP/QoS filter interfaces were excluded, so there is no double
+counting.
 
-显示的是**全主机物理网卡合计**，不是某个进程的流量。限速下载对照时，curl 自身被限制在约 2 MB/s，但同一秒 WLAN 计数曾跳到约 23.7 MB/s；探针确认这是其他进程的真实流量，界面显示 22.3 M/s 与系统计数一致。单位自动切换 B/s、K/s、M/s。
+The value is the **whole-host physical NIC total**, not per-process traffic. In a
+rate-limited download comparison, curl itself was limited to about 2 MB/s, but the WLAN
+counter jumped to about 23.7 MB/s in the same second; the probe confirmed that was real
+traffic from other processes, and the UI's 22.3 M/s matched the system counters. Units
+switch automatically between B/s, K/s and M/s.
 
-## 已知限制
+## Known limitations
 
-- 每次从资源管理器启动都会弹 UAC；这是管理员权限要求的直接结果。
-- DPI 布局已用开发版的 `ACCELBALL_DPI=96/120/144/192` 强制缩放验证（球径 74/93/111/148，内存约 11.6 MB），但本机只有 100% 单屏，真实「跨显示器 DPI 切换」未实测；`WM_DPICHANGED`、`WM_DISPLAYCHANGE`、任务栏工作区变化均已接到重新布局。
-- 多显示器硬件场景未实测；代码按最近显示器工作区定位并夹取，显示器移除/分辨率变化会重新布局。
-- 未做清理前后的性能 A/B 测试；内存清理不保证提速。
-- 未做开机自启、托盘图标、皮肤、多语言等扩展。
+- Launching from Explorer always triggers UAC, a direct consequence of requiring
+  administrator privileges.
+- DPI layout was verified with the development build's
+  `ACCELBALL_DPI=96/120/144/192` override (ball sizes 74/93/111/148 px, ~11.6 MB RSS),
+  but the machine only has a single 100% display, so a real cross-monitor DPI transition
+  was not tested. `WM_DPICHANGED`, `WM_DISPLAYCHANGE` and taskbar work-area changes are
+  wired to re-layout.
+- Multi-monitor hardware scenarios were not tested; the code positions and clamps to the
+  nearest monitor's work area and re-layouts when the display setup changes.
+- No before/after performance A/B test was done; memory cleanup does not guarantee a
+  speedup.
+- No auto-start, tray icon, skins or localization.
 
-## 目录
+## Layout
 
-- `src/`：C++ 源码与资源（manifest、图标）。
-- `build/`：构建脚本。
-- `installer/`：Inno Setup 脚本。
-- `tools/`：图标生成脚本、网络计数诊断探针。
-- `docs/`：自测记录。
-- `dist/`：构建产物（git 忽略）。
+- `src/`: C++ sources and resources (manifests, icon).
+- `build/`: build scripts.
+- `installer/`: Inno Setup script.
+- `tools/`: icon generator and network counter probe.
+- `docs/`: test notes (Chinese).
+- `dist/`: build output (git-ignored).
 
-自测详情见 [docs/自测记录.md](docs/自测记录.md)。
+See [docs/自测记录.md](docs/自测记录.md) for detailed test notes (Chinese).
 
 ## License
 
