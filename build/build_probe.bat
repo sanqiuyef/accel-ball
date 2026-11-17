@@ -2,7 +2,9 @@
 rem Build the network counter diagnostic probe (development only).
 setlocal
 for %%I in ("%~dp0..") do set "ROOT=%%~fI"
-call "D:\VS2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat" >nul
+call "%~dp0find_vcvars.bat"
+if errorlevel 1 exit /b 1
+call "%VCVARS%" >nul
 if errorlevel 1 (
   echo [probe] vcvars64.bat failed
   exit /b 1

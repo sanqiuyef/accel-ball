@@ -17,9 +17,11 @@ if /I "%MODE%"=="dev" (
 if not exist "%ROOT%\dist" mkdir "%ROOT%\dist"
 if not exist "%ROOT%\dist\obj" mkdir "%ROOT%\dist\obj"
 
-call "D:\VS2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat" >nul
+call "%~dp0find_vcvars.bat"
+if errorlevel 1 exit /b 1
+call "%VCVARS%" >nul
 if errorlevel 1 (
-  echo [build] vcvars64.bat not found or failed
+  echo [build] vcvars64.bat failed
   exit /b 1
 )
 

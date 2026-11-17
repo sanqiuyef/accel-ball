@@ -17,7 +17,8 @@ accel-ball/
 │  └─ app.ico            程序图标（由 tools/make_icon.py 生成）
 ├─ build/
 │  ├─ build.bat          vcvars64 + rc + cl 构建 dev/release
-│  └─ build_probe.bat    构建网络计数诊断探针
+│  ├─ build_probe.bat    构建网络计数诊断探针
+│  └─ find_vcvars.bat    用 vswhere 自动定位 vcvars64.bat
 ├─ installer/
 │  └─ accel-ball.iss     Inno Setup 6 安装脚本
 ├─ tools/
@@ -32,6 +33,7 @@ accel-ball/
 │  ├─ net_probe.exe      网络计数诊断工具
 │  ├─ AccelBall-Setup-1.0.0.exe  安装包
 │  └─ obj/               中间产物
+├─ LICENSE               MIT License
 ├─ README.md             项目说明
 └─ FOLDER_STRUCTURE.md   本文件
 ```

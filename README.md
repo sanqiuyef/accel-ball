@@ -1,5 +1,7 @@
 # 加速球（AccelBall）
 
+> Windows 10 floating "acceleration ball": memory usage, live network speed, double-click memory cleanup and edge docking. C++/Win32 + GDI+, single exe, no runtime dependency.
+
 Windows 10 桌面悬浮球小工具，借鉴杀毒/电脑管家的「加速球」交互形态，只做四件事：
 
 1. 常驻圆形悬浮球，显示当前内存占用百分比。
@@ -16,11 +18,12 @@ Windows 10 桌面悬浮球小工具，借鉴杀毒/电脑管家的「加速球�
 
 ## 安装 / 使用
 
-安装包：`dist/AccelBall-Setup-1.0.0.exe`
+源码仓库不包含预编译二进制。构建或打包后：
 
-- 安装到 `C:\Program Files\AccelBall`，创建开始菜单快捷方式（桌面快捷方式为可选项）。
-- 绿色版：`dist/AccelBall.exe`，可直接运行。
-- 卸载：设置 → 应用 → 加速球，或开始菜单里的卸载项。
+- 安装包：`dist/AccelBall-Setup-1.0.0.exe`
+- 绿色版：`dist/AccelBall.exe`
+
+安装包会安装到 `C:\Program Files\AccelBall`，创建开始菜单快捷方式（桌面快捷方式为可选项）；卸载走设置 → 应用 → 加速球。绿色版可直接运行。程序需要管理员权限。
 
 操作：
 
@@ -34,10 +37,10 @@ Windows 10 桌面悬浮球小工具，借鉴杀毒/电脑管家的「加速球�
 
 ## 构建
 
-需要 Visual Studio 2022 Build Tools（MSVC x64）与 Windows SDK。构建脚本固定调用：
+需要 Visual Studio 2022 Build Tools（MSVC x64）与 Windows SDK。构建脚本会用 `vswhere` 自动定位 `vcvars64.bat`；如果自动定位失败，手动指定：
 
-```
-D:\VS2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat
+```bash
+set VCVARS=C:\path\to\VC\Auxiliary\Build\vcvars64.bat
 ```
 
 ```bash
@@ -68,10 +71,10 @@ dist\net_probe.exe 10
 
 ## 安装包
 
-`installer/accel-ball.iss`，Inno Setup 6 编译（本机 6.7.3）：
+`installer/accel-ball.iss`，用 Inno Setup 6 的 `ISCC.exe` 编译（把 Inno Setup 安装目录加入 PATH，或使用完整路径）：
 
 ```bash
-"%LOCALAPPDATA%\Programs\Inno Setup 6\ISCC.exe" installer\accel-ball.iss
+iscc installer\accel-ball.iss
 ```
 
 输出 `dist/AccelBall-Setup-1.0.0.exe`。安装向导为英文（Inno Setup 未内置简体中文语言文件），应用名与快捷方式为中文。
@@ -111,3 +114,7 @@ dist\net_probe.exe 10
 - `dist/`：构建产物（git 忽略）。
 
 自测详情见 [docs/自测记录.md](docs/自测记录.md)。
+
+## License
+
+[MIT](LICENSE) © 2026 sanqiuyef
