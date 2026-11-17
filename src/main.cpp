@@ -5,8 +5,14 @@
 
 #pragma comment(lib, "gdiplus.lib")
 
+#ifdef ACCELBALL_DEV
+constexpr wchar_t kInstanceMutex[] = L"Local\\AccelBall.SingleInstance.Dev";
+#else
+constexpr wchar_t kInstanceMutex[] = L"Local\\AccelBall.SingleInstance";
+#endif
+
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
-    HANDLE mutex = CreateMutexW(nullptr, TRUE, L"Local\\AccelBall.SingleInstance");
+    HANDLE mutex = CreateMutexW(nullptr, TRUE, kInstanceMutex);
     if (mutex != nullptr && GetLastError() == ERROR_ALREADY_EXISTS) {
         CloseHandle(mutex);
         return 0;

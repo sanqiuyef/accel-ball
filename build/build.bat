@@ -7,9 +7,11 @@ if "%MODE%"=="" set "MODE=release"
 
 set "RCNAME=app.rc"
 set "OUTNAME=AccelBall.exe"
+set "EXTRA_DEFINE="
 if /I "%MODE%"=="dev" (
   set "RCNAME=app-dev.rc"
   set "OUTNAME=AccelBall-dev.exe"
+  set "EXTRA_DEFINE=/DACCELBALL_DEV"
 )
 
 if not exist "%ROOT%\dist" mkdir "%ROOT%\dist"
@@ -30,7 +32,7 @@ if errorlevel 1 (
 )
 popd
 
-cl /nologo /std:c++17 /O2 /MT /EHsc /W4 /utf-8 /DUNICODE /D_UNICODE ^
+cl /nologo /std:c++17 /O2 /MT /EHsc /W4 /utf-8 /DUNICODE /D_UNICODE %EXTRA_DEFINE% ^
   /Fo"%ROOT%\dist\obj\\" /Fd"%ROOT%\dist\obj\\" /Fe"%ROOT%\dist\%OUTNAME%" ^
   "%ROOT%\src\main.cpp" "%ROOT%\src\ball_window.cpp" "%ROOT%\src\metrics.cpp" ^
   "%ROOT%\src\cleaner.cpp" "%ROOT%\src\render.cpp" "%ROOT%\src\util.cpp" ^

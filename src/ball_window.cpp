@@ -14,9 +14,9 @@ namespace {
 constexpr wchar_t kWindowClass[] = L"AccelBallWindow";
 constexpr wchar_t kWindowTitle[] = L"加速球";
 
-constexpr int kBallSizeDip = 124;
-constexpr int kBarWidthDip = 132;
-constexpr int kBarHeightDip = 30;
+constexpr int kBallSizeDip = 74;
+constexpr int kBarLongDip = kBallSizeDip;
+constexpr int kBarShortDip = 30;
 constexpr int kDockThresholdDip = 22;
 constexpr int kDefaultMarginDip = 24;
 
@@ -117,6 +117,14 @@ LRESULT BallWindow::HandleMessage(UINT message, WPARAM wParam, LPARAM lParam) {
         case WM_MOUSELEAVE:
             OnMouseLeave();
             return 0;
+        case WM_DISPLAYCHANGE:
+            ApplyModeLayout(true);
+            return 0;
+        case WM_SETTINGCHANGE:
+            if (wParam == SPI_SETWORKAREA) {
+                ApplyModeLayout(true);
+            }
+            return 0;
         case WM_DPICHANGED:
             OnDpiChanged(HIWORD(wParam));
             return 0;
@@ -139,6 +147,17 @@ void BallWindow::OnCreate() {
     if (dpi_ == 0) {
         dpi_ = 96;
     }
+
+#ifdef ACCELBALL_DEV
+    // 开发版自测用：允许用环境变量强制 DPI，便于在 100% 屏幕上检查 125%/150% 布局。
+    wchar_t forcedDpi[16]{};
+    if (GetEnvironmentVariableW(L"ACCELBALL_DPI", forcedDpi, 16) > 0) {
+        const int value = static_cast<int>(wcstol(forcedDpi, nullptr, 10));
+        if (value >= 96 && value <= 480) {
+            dpi_ = static_cast<UINT>(value);
+        }
+    }
+#endif
 
     LoadConfig();
     UpdateMetrics();
@@ -287,7 +306,7 @@ void BallWindow::OnCleanDone(unsigned long long freedMegabytes) {
     if (freedMegabytes == 0) {
         toast_ = L"清理完成";
     } else {
-        toast_ = L"已释放 " + FormatFreed(freedMegabytes);
+        toast_ = L"释放 " + FormatFreedCompact(freedMegabytes);
     }
     toastUntilMs_ = GetTickCount64() + 3200;
     Paint();
@@ -328,6 +347,9 @@ void BallWindow::Paint() {
     params.width = rect.right - rect.left;
     params.height = rect.bottom - rect.top;
     params.barMode = (mode_ == ViewMode::Bar && !hoverExpanded_);
+    params.verticalBar = params.barMode && (dockEdge_ == 1 || dockEdge_ == 2);
+    params.dockEdge = dockEdge_;
+    params.barThickness = Scale(kBarShortDip);
     params.mem = memory_;
     params.net = network_;
     params.cleaning = cleaning_;
@@ -368,6 +390,7 @@ void BallWindow::StartClean() {
 void BallWindow::ApplyModeLayout(bool repaint) {
     const RECT work = WorkArea();
     const bool bar = (mode_ == ViewMode::Bar && !hoverExpanded_);
+    const bool verticalBar = (dockEdge_ == 1 || dockEdge_ == 2);
 
     int width = 0;
     int height = 0;
@@ -375,8 +398,8 @@ void BallWindow::ApplyModeLayout(bool repaint) {
     int y = 0;
 
     if (bar) {
-        width = Scale(kBarWidthDip);
-        height = Scale(kBarHeightDip);
+        width = Scale(verticalBar ? kBarShortDip : kBarLongDip);
+        height = Scale(verticalBar ? kBarLongDip : kBarShortDip);
         if (dockEdge_ == 1) {
             x = work.left;
             y = dockAlong_ - height / 2;
@@ -430,8 +453,36 @@ void BallWindow::ApplyModeLayout(bool repaint) {
 
     SetWindowPos(hwnd_, HWND_TOPMOST, x, y, width, height, SWP_NOACTIVATE | SWP_SHOWWINDOW);
 
-    HRGN region = bar ? CreateRoundRectRgn(0, 0, width + 1, height + 1, height, height)
-                      : CreateEllipticRgn(0, 0, width + 1, height + 1);
+    HRGN region = nullptr;
+    if (bar) {
+        const int radius = std::min(width, height);
+        region = CreateRoundRectRgn(0, 0, width + 1, height + 1, radius, radius);
+    } else {
+        region = CreateEllipticRgn(0, 0, width + 1, height + 1);
+
+        // 悬停展开时把不可见的贴边条区域并入命中区域，保证在条的两端点击/移动仍有效。
+        if (region != nullptr && mode_ == ViewMode::Bar && hoverExpanded_ && dockEdge_ != 0) {
+            const int shortSide = Scale(kBarShortDip);
+            RECT barRect{};
+            if (dockEdge_ == 1) {
+                barRect = {0, 0, shortSide, height};
+            } else if (dockEdge_ == 2) {
+                barRect = {width - shortSide, 0, width, height};
+            } else if (dockEdge_ == 3) {
+                barRect = {0, 0, width, shortSide};
+            } else if (dockEdge_ == 4) {
+                barRect = {0, height - shortSide, width, height};
+            }
+
+            HRGN barRegion = CreateRoundRectRgn(barRect.left, barRect.top, barRect.right + 1,
+                                                barRect.bottom + 1, shortSide, shortSide);
+            if (barRegion != nullptr) {
+                CombineRgn(region, region, barRegion, RGN_OR);
+                DeleteObject(barRegion);
+            }
+        }
+    }
+
     if (region != nullptr) {
         if (!SetWindowRgn(hwnd_, region, TRUE)) {
             DeleteObject(region);
@@ -518,7 +569,11 @@ std::wstring BallWindow::ConfigPath() const {
 
     directory += L"\\AccelBall";
     CreateDirectoryW(directory.c_str(), nullptr);
+#ifdef ACCELBALL_DEV
+    return directory + L"\\config-dev.ini";
+#else
     return directory + L"\\config.ini";
+#endif
 }
 
 void BallWindow::LoadConfig() {

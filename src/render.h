@@ -6,6 +6,9 @@ struct DrawParams {
     int width = 0;
     int height = 0;
     bool barMode = false;
+    bool verticalBar = false;
+    int dockEdge = 0;
+    int barThickness = 0;
     MemSnapshot mem;
     NetSpeed net;
     bool cleaning = false;
