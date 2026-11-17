@@ -16,15 +16,19 @@ accel-ball/
 │  ├─ resource.h         资源 ID
 │  └─ app.ico            程序图标（由 tools/make_icon.py 生成）
 ├─ build/
-│  └─ build.bat          调用 vcvars64 + rc + cl 构建
+│  └─ build.bat          调用 vcvars64 + rc + cl 构建 dev/release
 ├─ installer/
 │  └─ accel-ball.iss     Inno Setup 6 安装脚本
 ├─ tools/
 │  └─ make_icon.py       生成 app.ico
 ├─ docs/
 │  ├─ 自测记录.md        构建与功能自测记录
-│  └─ screenshots/       界面截图
+│  └─ screenshots/       界面截图（本地留档，git 忽略）
 ├─ dist/                 构建产物（git 忽略）
+│  ├─ AccelBall.exe      发布版（管理员权限）
+│  ├─ AccelBall-dev.exe  开发版（无需 UAC）
+│  ├─ AccelBall-Setup-1.0.0.exe  安装包
+│  └─ obj/               中间产物
 ├─ README.md             项目说明
 └─ FOLDER_STRUCTURE.md   本文件
 ```
