@@ -20,6 +20,17 @@ if errorlevel 1 (
   echo [probe] compile failed
   exit /b 1
 )
+
+cl /nologo /std:c++17 /O2 /MT /utf-8 /DUNICODE /D_UNICODE /I src ^
+  tools\autostart_probe.cpp src\autostart.cpp ^
+  /Fo"%ROOT%\dist\obj\\" /Fe"%ROOT%\dist\autostart_probe.exe" ^
+  /link
+if errorlevel 1 (
+  popd
+  echo [probe] autostart probe compile failed
+  exit /b 1
+)
 popd
 echo [probe] output: %ROOT%\dist\net_probe.exe
+echo [probe] output: %ROOT%\dist\autostart_probe.exe
 endlocal

@@ -38,6 +38,7 @@ cl /nologo /std:c++17 /O2 /MT /EHsc /W4 /utf-8 /DUNICODE /D_UNICODE %EXTRA_DEFIN
   /Fo"%ROOT%\dist\obj\\" /Fd"%ROOT%\dist\obj\\" /Fe"%ROOT%\dist\%OUTNAME%" ^
   "%ROOT%\src\main.cpp" "%ROOT%\src\ball_window.cpp" "%ROOT%\src\metrics.cpp" ^
   "%ROOT%\src\cleaner.cpp" "%ROOT%\src\render.cpp" "%ROOT%\src\util.cpp" ^
+  "%ROOT%\src\autostart.cpp" ^
   "%ROOT%\dist\app.res" ^
   /link /SUBSYSTEM:WINDOWS /MANIFEST:NO user32.lib gdi32.lib gdiplus.lib psapi.lib ^
   iphlpapi.lib shell32.lib advapi32.lib ole32.lib

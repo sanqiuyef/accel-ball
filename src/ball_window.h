@@ -30,6 +30,9 @@ private:
     void OnMouseLeave();
     void OnDpiChanged(UINT newDpi);
     void OnCleanDone(unsigned long long freedMegabytes);
+    void OnAutostartDone(bool enabled, bool success);
+    void StartAutostartToggle(bool enabled);
+    std::wstring AutostartTaskName() const;
 
     void ShowMenu(POINT screenPoint);
     void Paint();
@@ -66,4 +69,6 @@ private:
     bool cleaning_ = false;
     std::wstring toast_;
     unsigned long long toastUntilMs_ = 0;
+    bool autostartEnabled_ = false;
+    bool autostartBusy_ = false;
 };

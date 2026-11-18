@@ -29,9 +29,10 @@ It does not include virus scanning, process management, auto-start, skins, tray 
 
 ## Install / usage
 
-The source repository does not ship prebuilt binaries. After building / packaging:
+Prebuilt binaries are published on the [GitHub Releases](https://github.com/sanqiuyef/accel-ball/releases)
+page. To build from source:
 
-- Installer: `dist/AccelBall-Setup-1.0.0.exe`
+- Installer: `dist/AccelBall-Setup-1.1.0.exe`
 - Portable: `dist/AccelBall.exe`
 
 The installer installs to `C:\Program Files\AccelBall` and creates Start Menu shortcuts
@@ -49,6 +50,9 @@ Usage:
   30×74 vertical strip; top/bottom edges become a 74×30 horizontal strip.
 - Restore: hover the strip; it collapses again about 0.45 s after the mouse leaves.
 - Exit / clean now: right-click the ball or strip.
+- Autostart: right-click → **开机自启** (checked = enabled). The app creates or removes a
+  Task Scheduler task named `AccelBall` with the highest privileges, so Windows starts it
+  at sign-in without a UAC prompt. The task runs at user sign-in, not before login.
 - Position and dock state are saved in `%APPDATA%\AccelBall\config.ini`.
 
 ## Build
@@ -68,7 +72,7 @@ build\build.bat dev
 build\build.bat release
 ```
 
-Outputs go to `dist/`: `AccelBall-dev.exe` (~227 KB) or `AccelBall.exe` (~227 KB).
+Outputs go to `dist/`: `AccelBall-dev.exe` (~237 KB) or `AccelBall.exe` (~237 KB).
 
 The development build uses a separate single-instance mutex and
 `%APPDATA%\AccelBall\config-dev.ini`, so it can run alongside the release build. It also
@@ -99,9 +103,9 @@ directory to PATH or use the full path):
 iscc installer\accel-ball.iss
 ```
 
-Output: `dist/AccelBall-Setup-1.0.0.exe`. The installer wizard is in English (Inno Setup
+Output: `dist/AccelBall-Setup-1.1.0.exe`. The installer wizard is in English (Inno Setup
 does not bundle a Simplified Chinese language file); the app name and shortcuts are
-Chinese.
+Chinese. Uninstalling also removes the `AccelBall` autostart task if it exists.
 
 ## Memory cleanup
 
@@ -149,7 +153,8 @@ switch automatically between B/s, K/s and M/s.
   nearest monitor's work area and re-layouts when the display setup changes.
 - No before/after performance A/B test was done; memory cleanup does not guarantee a
   speedup.
-- No auto-start, tray icon, skins or localization.
+- Autostart is a per-user Task Scheduler task: it starts at sign-in, not before login.
+- No tray icon, skins or localization.
 
 ## Layout
 

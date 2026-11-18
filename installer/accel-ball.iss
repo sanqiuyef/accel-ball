@@ -1,6 +1,6 @@
 ﻿; 加速球安装脚本（Inno Setup 6）
 #define MyAppName "加速球"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "sanqiuyef"
 #define MyAppExeName "AccelBall.exe"
 
@@ -41,3 +41,6 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "运行{#MyAppName}"; Flags: nowait postinstall skipifsilent
+
+[UninstallRun]
+Filename: "{cmd}"; Parameters: "/c schtasks /Delete /TN ""AccelBall"" /F >nul 2>&1"; Flags: runhidden; RunOnceId: "DeleteAccelBallAutostart"

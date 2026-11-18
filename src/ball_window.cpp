@@ -1,5 +1,6 @@
 #include "ball_window.h"
 
+#include "autostart.h"
 #include "cleaner.h"
 #include "resource.h"
 #include "util.h"
@@ -23,8 +24,16 @@ constexpr int kDefaultMarginDip = 24;
 constexpr UINT_PTR kTimerMetrics = 1;
 constexpr UINT_PTR kTimerCollapse = 2;
 constexpr UINT kMessageCleanDone = WM_APP + 1;
+constexpr UINT kMessageAutostartDone = WM_APP + 2;
 constexpr UINT kCommandClean = 40001;
 constexpr UINT kCommandExit = 40002;
+constexpr UINT kCommandAutostart = 40003;
+
+std::wstring ExecutablePath() {
+    wchar_t buffer[MAX_PATH]{};
+    const DWORD length = GetModuleFileNameW(nullptr, buffer, MAX_PATH);
+    return std::wstring(buffer, length);
+}
 
 int ReadIniInt(const std::wstring& path, const wchar_t* section, const wchar_t* key, int fallback) {
     wchar_t buffer[64]{};
@@ -131,6 +140,9 @@ LRESULT BallWindow::HandleMessage(UINT message, WPARAM wParam, LPARAM lParam) {
         case kMessageCleanDone:
             OnCleanDone(static_cast<unsigned long long>(wParam));
             return 0;
+        case kMessageAutostartDone:
+            OnAutostartDone(wParam != 0, lParam != 0);
+            return 0;
         case WM_ERASEBKGND:
             return 1;
         case WM_DESTROY:
@@ -161,6 +173,7 @@ void BallWindow::OnCreate() {
 
     LoadConfig();
     UpdateMetrics();
+    autostartEnabled_ = AutostartTaskExists(AutostartTaskName());
     SetTimer(hwnd_, kTimerMetrics, 1000, nullptr);
     ApplyModeLayout(false);
     Paint();
@@ -312,6 +325,46 @@ void BallWindow::OnCleanDone(unsigned long long freedMegabytes) {
     Paint();
 }
 
+void BallWindow::OnAutostartDone(bool enabled, bool success) {
+    autostartBusy_ = false;
+
+    if (success) {
+        autostartEnabled_ = enabled;
+        toast_ = enabled ? L"自启已开" : L"自启已关";
+    } else {
+        toast_ = L"自启失败";
+    }
+    toastUntilMs_ = GetTickCount64() + 3000;
+    Paint();
+}
+
+void BallWindow::StartAutostartToggle(bool enabled) {
+    if (autostartBusy_) {
+        return;
+    }
+
+    autostartBusy_ = true;
+    toast_ = L"设置自启";
+    toastUntilMs_ = GetTickCount64() + 5000;
+    Paint();
+
+    const std::wstring taskName = AutostartTaskName();
+    const std::wstring exePath = ExecutablePath();
+    HWND target = hwnd_;
+    std::thread([target, taskName, exePath, enabled]() {
+        const bool success = SetAutostartTask(taskName, exePath, enabled);
+        PostMessageW(target, kMessageAutostartDone, enabled ? 1 : 0, success ? 1 : 0);
+    }).detach();
+}
+
+std::wstring BallWindow::AutostartTaskName() const {
+#ifdef ACCELBALL_DEV
+    return L"AccelBallDev";
+#else
+    return L"AccelBall";
+#endif
+}
+
 void BallWindow::ShowMenu(POINT screenPoint) {
     HMENU menu = CreatePopupMenu();
     if (menu == nullptr) {
@@ -319,6 +372,14 @@ void BallWindow::ShowMenu(POINT screenPoint) {
     }
 
     AppendMenuW(menu, MF_STRING, kCommandClean, L"立即清理内存");
+    UINT autostartFlags = MF_STRING;
+    if (autostartEnabled_) {
+        autostartFlags |= MF_CHECKED;
+    }
+    if (autostartBusy_) {
+        autostartFlags |= MF_GRAYED;
+    }
+    AppendMenuW(menu, autostartFlags, kCommandAutostart, L"开机自启");
     AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
     AppendMenuW(menu, MF_STRING, kCommandExit, L"退出");
 
@@ -330,6 +391,8 @@ void BallWindow::ShowMenu(POINT screenPoint) {
 
     if (command == static_cast<int>(kCommandClean)) {
         StartClean();
+    } else if (command == static_cast<int>(kCommandAutostart)) {
+        StartAutostartToggle(!autostartEnabled_);
     } else if (command == static_cast<int>(kCommandExit)) {
         DestroyWindow(hwnd_);
     }

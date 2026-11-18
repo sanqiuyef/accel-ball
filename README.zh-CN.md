@@ -22,9 +22,9 @@ Windows 10 桌面悬浮球小工具，借鉴杀毒/电脑管家的「加速球�
 
 ## 安装 / 使用
 
-源码仓库不包含预编译二进制。构建或打包后：
+预编译包见 [GitHub Releases](https://github.com/sanqiuyef/accel-ball/releases)。从源码构建/打包后：
 
-- 安装包：`dist/AccelBall-Setup-1.0.0.exe`
+- 安装包：`dist/AccelBall-Setup-1.1.0.exe`
 - 绿色版：`dist/AccelBall.exe`
 
 安装包会安装到 `C:\Program Files\AccelBall`，创建开始菜单快捷方式（桌面快捷方式为可选项）；卸载走设置 → 应用 → 加速球。绿色版可直接运行。程序需要管理员权限。
@@ -37,6 +37,7 @@ Windows 10 桌面悬浮球小工具，借鉴杀毒/电脑管家的「加速球�
 - 贴边收起：把球拖到任意屏幕边缘松手，自动吸附。左右边缘变为 30×74 竖向条，上下边缘变为 74×30 横向条。
 - 恢复圆球：鼠标移入贴边条；移出后约 0.45 秒重新收起。
 - 退出 / 立即清理：右键球或贴边条。
+- 开机自启：右键 → **开机自启**（勾选即开启）。程序会创建/删除名为 `AccelBall` 的计划任务，以最高权限在登录时启动，不弹 UAC；它是用户登录后启动，不是登录前。
 - 窗口位置和贴边状态保存在 `%APPDATA%\AccelBall\config.ini`。
 
 ## 构建
@@ -55,7 +56,7 @@ build\build.bat dev
 build\build.bat release
 ```
 
-产物输出到 `dist/`：`AccelBall-dev.exe`（约 227 KB）或 `AccelBall.exe`（约 227 KB）。
+产物输出到 `dist/`：`AccelBall-dev.exe`（约 237 KB）或 `AccelBall.exe`（约 237 KB）。
 
 开发版使用独立的单实例名和 `%APPDATA%\AccelBall\config-dev.ini`，可与发布版并行运行。开发版还支持用环境变量强制缩放做布局自测（不写入发布版）：
 
@@ -81,7 +82,7 @@ dist\net_probe.exe 10
 iscc installer\accel-ball.iss
 ```
 
-输出 `dist/AccelBall-Setup-1.0.0.exe`。安装向导为英文（Inno Setup 未内置简体中文语言文件），应用名与快捷方式为中文。
+输出 `dist/AccelBall-Setup-1.1.0.exe`。安装向导为英文（Inno Setup 未内置简体中文语言文件），应用名与快捷方式为中文。卸载时会一并删除 `AccelBall` 自启任务（如果存在）。
 
 ## 内存清理机制
 
@@ -106,7 +107,8 @@ iscc installer\accel-ball.iss
 - DPI 布局已用开发版的 `ACCELBALL_DPI=96/120/144/192` 强制缩放验证（球径 74/93/111/148，内存约 11.6 MB），但本机只有 100% 单屏，真实「跨显示器 DPI 切换」未实测；`WM_DPICHANGED`、`WM_DISPLAYCHANGE`、任务栏工作区变化均已接到重新布局。
 - 多显示器硬件场景未实测；代码按最近显示器工作区定位并夹取，显示器移除/分辨率变化会重新布局。
 - 未做清理前后的性能 A/B 测试；内存清理不保证提速。
-- 未做开机自启、托盘图标、皮肤、多语言等扩展。
+- 开机自启用的是当前用户的计划任务：用户登录后启动，登录前不运行。
+- 未做托盘图标、皮肤、多语言等扩展。
 
 ## 目录
 
